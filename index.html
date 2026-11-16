@@ -223,7 +223,7 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
 .scr-banner b{ display:block; font-weight:500; }
 .scr-banner span{ color:var(--muted); }
 .scr-banner .ic{ width:18px; height:18px; color:var(--accent); }
-.sim[data-state="read"] .scr-banner{ transform:none; opacity:1; transition:transform 240ms var(--ease-out), opacity 200ms ease; }
+.sim[data-state="read"] .scr-banner{ transform:none; opacity:1; transition:transform 320ms var(--ease-out), opacity 240ms ease; }
 .scr-card{
   --c-bg:#18181B; --c-ink:#FAFAFA; --c-muted:#A1A1AA; --c-line:rgba(250,250,250,.12); --c-btn:#FAFAFA; --c-btn-ink:#0A0A0B;
   position:absolute; inset:52px 0 0 0; z-index:4; border-radius:28px 28px 0 0; background:var(--c-bg); color:var(--c-ink);
@@ -232,7 +232,7 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
 }
 .scr-card[data-tema="hueso"]{ --c-bg:#FAFAFA; --c-ink:#0A0A0B; --c-muted:#52525B; --c-line:rgba(10,10,11,.12); --c-btn:#0A0A0B; --c-btn-ink:#FAFAFA; }
 .scr-card[data-tema="acero"]{ --c-bg:#22303F; --c-ink:#F4F6F8; --c-muted:#B7C3CF; --c-line:rgba(244,246,248,.16); --c-btn:#F4F6F8; --c-btn-ink:#16202B; }
-.sim[data-state="open"] .scr-card{ transform:none; transition:transform 360ms var(--ease-drawer), background-color 240ms ease, color 240ms ease; }
+.sim[data-state="open"] .scr-card{ transform:none; transition:transform 520ms var(--ease-drawer), background-color 240ms ease, color 240ms ease; }
 .c-avatar{ width:68px; height:68px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--c-line); font:500 1.375rem/1 var(--font); letter-spacing:-.02em; margin-bottom:12px; }
 .c-name{ font-size:1.25rem; font-weight:500; letter-spacing:-.03em; line-height:1.2; overflow-wrap:anywhere; }
 .c-role{ font-size:.8125rem; color:var(--c-muted); margin-top:3px; overflow-wrap:anywhere; }
@@ -248,10 +248,11 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
   background:linear-gradient(135deg,#3a3a41 0%,#1c1c1f 42%,#0c0c0e 100%); border:1px solid rgba(250,250,250,.16);
   box-shadow:0 22px 44px -14px #000; display:flex; align-items:flex-end; justify-content:space-between; padding:9px 10px; color:#D4D4D8;
   font:500 .625rem/1 var(--font); letter-spacing:-.01em;
-  transform:rotate(-9deg); transition:transform 420ms var(--ease-out);
+  transform:rotate(-9deg); transition:transform 700ms var(--ease-out);
 }
 .token svg{ width:18px; height:18px; }
-.sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(-58px,-372px) rotate(-17deg) scale(.96); }
+/* la tarjeta se acerca por debajo del aviso, para que el aviso del chip se lea completo */
+.sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(-16px,-296px) rotate(-14deg) scale(.94); }
 .steps{ display:grid; gap:0; counter-reset:s; }
 .steps li{ counter-increment:s; display:flex; align-items:baseline; gap:14px; padding:13px 0; border-top:1px solid var(--line); color:var(--dim); transition:color 220ms ease; }
 .steps li::before{ content:counter(s); font:500 .875rem/1 var(--font); font-variant-numeric:tabular-nums; color:inherit; min-width:.8em; }
@@ -285,7 +286,7 @@ textarea.input{ min-height:112px; resize:vertical; }
   .sim__view{ grid-area:view; align-self:center; padding:24px 0; }
   .device{ width:286px; height:586px; }
   .token{ width:150px; left:calc(50% + 70px); bottom:60px; }
-  .sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(-86px,-404px) rotate(-17deg) scale(.96); }
+  .sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(-44px,-320px) rotate(-14deg) scale(.94); }
 }
 
 /* ---------- catálogo ---------- */
@@ -714,11 +715,11 @@ textarea.input{ min-height:112px; resize:vertical; }
     <form class="sim__form" id="simForm" autocomplete="off" onsubmit="return false">
       <div class="field">
         <label for="fNombre">Nombre en la tarjeta</label>
-        <input class="input" id="fNombre" name="nombre" type="text" maxlength="40" placeholder="Tu nombre" autocapitalize="words">
+        <input class="input" id="fNombre" name="nombre" type="text" maxlength="40" placeholder="Tu nombre" autocapitalize="words" enterkeyhint="next">
       </div>
       <div class="field">
         <label for="fCargo">Negocio o cargo</label>
-        <input class="input" id="fCargo" name="cargo" type="text" maxlength="48" placeholder="Tu negocio o cargo">
+        <input class="input" id="fCargo" name="cargo" type="text" maxlength="48" placeholder="Tu negocio o cargo" enterkeyhint="go">
       </div>
       <div class="field">
         <span class="label" id="lblLinks">Enlaces que quieres mostrar</span>
@@ -1452,23 +1453,56 @@ function simState(s){
   var n = { idle:0, near:1, read:2, open:3 }[s];
   $$('#steps li').forEach(function(li, i){ li.classList.toggle('is-on', i < n); });
 }
+// lleva la pantalla hasta el teléfono y avisa cuando ya llegó
+function simGoToPhone(done){
+  var view = $('.sim__view'), bar = $('#bar');
+  var top = $('.nav').getBoundingClientRect().bottom + 10;
+  var bottom = window.innerHeight - (bar.classList.contains('is-on') ? bar.getBoundingClientRect().height : 0) - 10;
+  var r = view.getBoundingClientRect();
+  if (r.top >= top - 2 && r.bottom <= bottom + 2) return done();
+  var max = document.documentElement.scrollHeight - window.innerHeight;
+  var y = Math.max(0, Math.min(max, Math.round(window.scrollY + r.top - top - Math.max(0, (bottom - top - r.height) / 2))));
+  if (Math.abs(y - window.scrollY) < 3) return done();
+  window.scrollTo({ top:y, behavior: reduce.matches ? 'auto' : 'smooth' });
+  var t0 = performance.now(), last = window.scrollY, still = 0;
+  (function wait(now){
+    var sy = window.scrollY;
+    still = Math.abs(sy - last) < 1 ? still + 1 : 0; last = sy;
+    if (Math.abs(sy - y) < 3 || (still > 12 && now - t0 > 250) || now - t0 > 2200) return done();
+    simRaf = requestAnimationFrame(wait);
+  })(t0);
+}
 function simRun(){
   simT.forEach(clearTimeout); simT = []; cancelAnimationFrame(simRaf);
   var out = $('#simTime'), go = $('#simGo'), fast = reduce.matches;
+  var D = fast ? [0, 100, 500] : [0, 750, 1750];
   simState('idle'); out.textContent = '0,0 s';
-  var t0 = performance.now();
-  (function tick(now){
-    var s = Math.min(1, (now - t0 - 60) / 1000);
-    out.textContent = Math.max(0, s).toFixed(1).replace('.', ',') + ' s';
-    if (s < 1) simRaf = requestAnimationFrame(tick);
-  })(t0);
-  simT.push(setTimeout(function(){ simState('near'); }, 60));
-  simT.push(setTimeout(function(){ simState('read'); }, fast ? 80 : 400));
+  var typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName) && sim.contains(document.activeElement);
+  if (typing) document.activeElement.blur();
+  // si el teclado estaba abierto se espera a que se cierre antes de medir la pantalla
   simT.push(setTimeout(function(){
-    simState('open'); go.textContent = 'Repetir el toque';
-    $('#simSay').textContent = 'Se abrió la tarjeta de contacto de ' + ($('#fNombre').value.trim() || 'tu nombre') + ' en un segundo.';
-  }, fast ? 100 : 700));
+    simGoToPhone(function(){
+      // una pausa corta para que el ojo llegue al teléfono antes de que la tarjeta se mueva
+      simT.push(setTimeout(function(){
+        var t0 = performance.now();
+        (function tick(now){
+          var s = Math.min(1, (now - t0 - D[1]) / (D[2] - D[1]));
+          out.textContent = Math.max(0, s).toFixed(1).replace('.', ',') + ' s';
+          if (s < 1) simRaf = requestAnimationFrame(tick);
+        })(t0);
+        simT.push(setTimeout(function(){ simState('near'); }, D[0]));
+        simT.push(setTimeout(function(){ simState('read'); }, D[1]));
+        simT.push(setTimeout(function(){
+          simState('open'); go.textContent = 'Repetir el toque';
+          $('#simSay').textContent = 'Se abrió la tarjeta de contacto de ' + ($('#fNombre').value.trim() || 'tu nombre') + ' en un segundo.';
+        }, D[2]));
+      }, fast ? 0 : 260));
+    });
+  }, typing ? 320 : 0));
 }
+// con la tecla de ir del teclado: del nombre pasa al cargo, y del cargo va directo al teléfono
+$('#fNombre').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); $('#fCargo').focus(); } });
+$('#fCargo').addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); simRun(); } });
 $('#simForm').addEventListener('input', paintSim);
 $('#simGo').addEventListener('click', simRun);
 $('#simOrder').addEventListener('click', function(){
@@ -1714,25 +1748,27 @@ var FRAG3 = [
 '    return un(a,b);',
 '  }',
 '  if(uModel<4.5){',
-'    // manilla de pie: aro ovalado vertical, inclinado unos 20 grados como en la foto de referencia',
-'    p.xy=mat2(.94,.34,-.34,.94)*p.xy;',
-'    // la banda se ensancha de forma gradual hacia el frente del chip (lado derecho) y se angosta en la correa (izquierdo)',
-'    float w=smoothstep(-.35,.75,p.x);',
-'    float band=ext(abs(sdRR(p.xy,vec2(.7,1.02),.69))-.012,p.z,mix(.175,.3,w))-.024;',
-'    // extremo de la correa montado por fuera, siguiendo la misma curva',
-'    float lay=ext(abs(sdRR(p.xy,vec2(.75,1.07),.74))-.012,p.z,.175)-.024;',
-'    lay=max(lay,max(p.x+.25,abs(p.y+.02)-.8));',
-'    // presilla que abraza las dos capas, en la parte media-alta',
-'    float keep=ext(abs(sdRR(p.xy,vec2(.727,1.047),.717))-.062,p.z,.215)-.02;',
-'    keep=max(keep,max(p.x+.25,abs(p.y-.63)-.055));',
+'    // manilla delgada tipo banda deportiva: aro ovalado acostado, con el modulo NFC plano al frente',
+'    vec3 q=vec3(p.x,p.z,p.y)/1.2;',
+'    float wm=smoothstep(.15,.5,q.y)*(1.-smoothstep(.4,.78,abs(q.x)));',
+'    float ring=sdRR(q.xy,vec2(1.06,.66),.6);',
+'    // correa fina; el frente del chip apenas un poco mas ancho y grueso',
+'    float band=ext(abs(ring)-mix(.012,.026,wm),q.z,mix(.118,.142,wm))-.022;',
+'    // extremo de la correa montado por fuera, en la parte de atras',
+'    float lay=ext(abs(ring-.06)-.012,q.z,.118)-.022;',
+'    lay=max(lay,max(q.y+.2,abs(q.x-.1)-.62));',
+'    // presilla que abraza las dos capas',
+'    float keep=ext(abs(ring-.03)-.056,q.z,.14)-.016;',
+'    keep=max(keep,max(q.y+.2,abs(q.x+.42)-.04));',
 '    float d=min(band,min(lay,keep));',
-'    // 7 agujeros redondos que atraviesan la correa',
-'    float hole=length(vec2(mod(p.y+.085,.17)-.085,p.z))-.04;',
-'    if(p.x<-.45&&abs(p.y+.08)<.6)d=max(d,-hole);',
-'    vec2 a=vec2(d,3.);',
-'    // pin metalico plateado encajado en un agujero central',
-'    vec2 pin=vec2(ext(length(vec2(p.y-.17,p.z))-.05,p.x+.79,.03)-.012,6.);',
-'    return un(a,pin);',
+'    // 7 agujeros redondos en la correa',
+'    float hole=length(vec2(mod(q.x+.075,.15)-.075,q.z))-.034;',
+'    if(q.y<-.3&&q.x>-.375&&q.x<.675)d=max(d,-hole);',
+'    // broche negro encajado en un agujero',
+'    d=min(d,ext(length(vec2(q.x-.15,q.z))-.048,q.y+.765,.018)-.012);',
+'    // punto pequeno del chip en la cara del frente',
+'    float dotc=ext(length(vec2(q.x-.4,q.z))-.03,q.y-.708,.006)-.004;',
+'    return un(vec2(d*1.2,7.),vec2(dotc*1.2,6.));',
 '  }',
 '  return vec2(tube(p,.72,.055,.3,.03),5.);',
 '}',
@@ -1779,6 +1815,7 @@ var FRAG3 = [
 '      else if(id<2.5){vec2 tuv=vec2(p.x/2.6+.5,.5-p.y/1.64);alb=texture2D(uTex,clamp(tuv,0.,1.)).rgb*.82;if(abs(n.z)<.3)alb*=.5;f0=.03;gl=.1;}',
 '      else if(id<3.5){alb=vec3(.07);f0=.05;gl=.48;}',
 '      else if(id<4.5){alb=vec3(.84,.84,.82);f0=.03;gl=.1;}',
+'      else if(id>6.5){alb=vec3(.055);f0=.04;gl=.36;}',
 '      else if(id>5.5){metal=true;}',
 '      else{if(abs(p.y)<.17&&length(p.xz)>.74){alb=vec3(.012);f0=.08;gl=1.;kk=0.;}else{metal=true;}}',
 '      if(metal){vec3 s=env(rw,0.)*.7+env(rw,1.)*.3;col=s*mix(vec3(.72,.73,.76),vec3(1.),fr);}',
@@ -1792,7 +1829,7 @@ var FRAG3 = [
 '  gl_FragColor=vec4(oc,cov);',
 '}'].join('\n');
 // postura inicial de cada modelo: [inclinación, giro]
-var POSES = { tarjeta:[0.22,-0.6], ecologica:[0.22,0.55], pegatina:[0.3,-0.5], collar:[0.15,-0.45], manilla:[0.1,0.75], anillo:[0.5,0.35] };
+var POSES = { tarjeta:[0.22,-0.6], ecologica:[0.22,0.55], pegatina:[0.3,-0.5], collar:[0.15,-0.45], manilla:[0.42,-0.3], anillo:[0.5,0.35] };
 var viewer3d = null, viewerFail = false, miniCtx = null;
 try { miniCtx = $('#glMini').getContext('2d'); } catch(e){}
 function Viewer(canvas, host){
