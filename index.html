@@ -215,7 +215,7 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
 .sim[data-state="near"] .scr-idle svg, .sim[data-state="read"] .scr-idle svg{ color:var(--ink); transform:scale(1.08); }
 .sim[data-state="open"] .scr-idle{ opacity:0; }
 .scr-banner{
-  position:absolute; top:42px; left:10px; right:10px; z-index:5; display:flex; align-items:center; gap:10px;
+  position:absolute; top:58px; left:10px; right:10px; z-index:5; display:flex; align-items:center; gap:10px;
   padding:10px 12px; border-radius:18px; background:rgba(39,39,42,.96); border:1px solid var(--line-2);
   font-size:.78125rem; line-height:1.3; text-align:left;
   transform:translateY(-150%); opacity:0; transition:transform 180ms var(--ease-out), opacity 140ms ease;
@@ -248,11 +248,45 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
   background:linear-gradient(135deg,#3a3a41 0%,#1c1c1f 42%,#0c0c0e 100%); border:1px solid rgba(250,250,250,.16);
   box-shadow:0 22px 44px -14px #000; display:flex; align-items:flex-end; justify-content:space-between; padding:9px 10px; color:#D4D4D8;
   font:500 .625rem/1 var(--font); letter-spacing:-.01em;
-  transform:rotate(-9deg); transition:transform 700ms var(--ease-out);
+  --tx:1px; --ty:-445px; --ts:.8; --tb:10px;
+  transform:rotate(-9deg); transition:transform 520ms var(--ease-out);
 }
 .token svg{ width:18px; height:18px; }
-/* la tarjeta se acerca por debajo del aviso, para que el aviso del chip se lea completo */
-.sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(-16px,-296px) rotate(-14deg) scale(.94); }
+/* la tarjeta sube hasta quedar al lado de la cámara, por encima del aviso, y ahí toca el celular */
+.token::before,.token::after{ content:""; position:absolute; inset:-1px; border-radius:inherit; border:1px solid rgba(250,250,250,.6); opacity:0; pointer-events:none; }
+.sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(var(--tx),var(--ty)) rotate(-5deg) scale(var(--ts)); }
+.sim[data-state="near"] .token{ animation:tokenUp 900ms linear both; }
+.sim[data-state="read"] .token{ animation:tokenTap 360ms var(--ease-out) both; }
+.sim[data-state="read"] .token::before{ animation:tokenRing 680ms var(--ease-out) 60ms both; }
+.sim[data-state="read"] .token::after{ animation:tokenRing 680ms var(--ease-out) 290ms both; }
+@keyframes tokenUp{
+  0%{ transform:translate(calc(var(--tx) * 0.000 + var(--tb) * 0.000),calc(var(--ty) * 0.000)) rotate(-9.00deg) scale(calc(1 + (var(--ts) - 1) * 0.000 + 0.000)); }
+  5%{ transform:translate(calc(var(--tx) * 0.007 + var(--tb) * 0.022),calc(var(--ty) * 0.007)) rotate(-8.97deg) scale(calc(1 + (var(--ts) - 1) * 0.007 + 0.013)); }
+  10%{ transform:translate(calc(var(--tx) * 0.026 + var(--tb) * 0.080),calc(var(--ty) * 0.026)) rotate(-8.90deg) scale(calc(1 + (var(--ts) - 1) * 0.026 + 0.024)); }
+  15%{ transform:translate(calc(var(--tx) * 0.057 + var(--tb) * 0.179),calc(var(--ty) * 0.057)) rotate(-8.77deg) scale(calc(1 + (var(--ts) - 1) * 0.057 + 0.034)); }
+  20%{ transform:translate(calc(var(--tx) * 0.104 + var(--tb) * 0.320),calc(var(--ty) * 0.104)) rotate(-8.58deg) scale(calc(1 + (var(--ts) - 1) * 0.104 + 0.042)); }
+  25%{ transform:translate(calc(var(--tx) * 0.167 + var(--tb) * 0.500),calc(var(--ty) * 0.167)) rotate(-8.33deg) scale(calc(1 + (var(--ts) - 1) * 0.167 + 0.048)); }
+  30%{ transform:translate(calc(var(--tx) * 0.246 + var(--tb) * 0.698),calc(var(--ty) * 0.246)) rotate(-8.02deg) scale(calc(1 + (var(--ts) - 1) * 0.246 + 0.050)); }
+  35%{ transform:translate(calc(var(--tx) * 0.340 + var(--tb) * 0.876),calc(var(--ty) * 0.340)) rotate(-7.64deg) scale(calc(1 + (var(--ts) - 1) * 0.340 + 0.048)); }
+  40%{ transform:translate(calc(var(--tx) * 0.443 + var(--tb) * 0.984),calc(var(--ty) * 0.443)) rotate(-7.23deg) scale(calc(1 + (var(--ts) - 1) * 0.443 + 0.043)); }
+  45%{ transform:translate(calc(var(--tx) * 0.549 + var(--tb) * 0.988),calc(var(--ty) * 0.549)) rotate(-6.80deg) scale(calc(1 + (var(--ts) - 1) * 0.549 + 0.036)); }
+  50%{ transform:translate(calc(var(--tx) * 0.651 + var(--tb) * 0.889),calc(var(--ty) * 0.651)) rotate(-6.40deg) scale(calc(1 + (var(--ts) - 1) * 0.651 + 0.029)); }
+  55%{ transform:translate(calc(var(--tx) * 0.743 + var(--tb) * 0.723),calc(var(--ty) * 0.743)) rotate(-6.03deg) scale(calc(1 + (var(--ts) - 1) * 0.743 + 0.021)); }
+  60%{ transform:translate(calc(var(--tx) * 0.820 + var(--tb) * 0.537),calc(var(--ty) * 0.820)) rotate(-5.72deg) scale(calc(1 + (var(--ts) - 1) * 0.820 + 0.015)); }
+  65%{ transform:translate(calc(var(--tx) * 0.881 + var(--tb) * 0.367),calc(var(--ty) * 0.881)) rotate(-5.48deg) scale(calc(1 + (var(--ts) - 1) * 0.881 + 0.010)); }
+  70%{ transform:translate(calc(var(--tx) * 0.926 + var(--tb) * 0.231),calc(var(--ty) * 0.926)) rotate(-5.30deg) scale(calc(1 + (var(--ts) - 1) * 0.926 + 0.006)); }
+  75%{ transform:translate(calc(var(--tx) * 0.958 + var(--tb) * 0.133),calc(var(--ty) * 0.958)) rotate(-5.17deg) scale(calc(1 + (var(--ts) - 1) * 0.958 + 0.003)); }
+  80%{ transform:translate(calc(var(--tx) * 0.978 + var(--tb) * 0.068),calc(var(--ty) * 0.978)) rotate(-5.09deg) scale(calc(1 + (var(--ts) - 1) * 0.978 + 0.002)); }
+  85%{ transform:translate(calc(var(--tx) * 0.991 + var(--tb) * 0.030),calc(var(--ty) * 0.991)) rotate(-5.04deg) scale(calc(1 + (var(--ts) - 1) * 0.991 + 0.001)); }
+  90%{ transform:translate(calc(var(--tx) * 0.997 + var(--tb) * 0.009),calc(var(--ty) * 0.997)) rotate(-5.01deg) scale(calc(1 + (var(--ts) - 1) * 0.997 + 0.000)); }
+  95%{ transform:translate(calc(var(--tx) * 1.000 + var(--tb) * 0.001),calc(var(--ty) * 1.000)) rotate(-5.00deg) scale(calc(1 + (var(--ts) - 1) * 1.000 + 0.000)); }
+  100%{ transform:translate(calc(var(--tx) * 1.000 + var(--tb) * 0.000),calc(var(--ty) * 1.000)) rotate(-5.00deg) scale(calc(1 + (var(--ts) - 1) * 1.000 + 0.000)); }
+}
+@keyframes tokenTap{
+  0%,100%{ transform:translate(var(--tx),var(--ty)) rotate(-5deg) scale(var(--ts)); }
+  45%{ transform:translate(var(--tx),calc(var(--ty) + 2px)) rotate(-5deg) scale(calc(var(--ts) * .95)); }
+}
+@keyframes tokenRing{ from{ opacity:.75; transform:scale(1); } to{ opacity:0; transform:scale(1.4); } }
 .steps{ display:grid; gap:0; counter-reset:s; }
 .steps li{ counter-increment:s; display:flex; align-items:baseline; gap:14px; padding:13px 0; border-top:1px solid var(--line); color:var(--dim); transition:color 220ms ease; }
 .steps li::before{ content:counter(s); font:500 .875rem/1 var(--font); font-variant-numeric:tabular-nums; color:inherit; min-width:.8em; }
@@ -285,8 +319,7 @@ textarea.input{ min-height:112px; resize:vertical; }
   .sim__head{ grid-area:head; } .sim__form{ grid-area:form; }
   .sim__view{ grid-area:view; align-self:center; padding:24px 0; }
   .device{ width:286px; height:586px; }
-  .token{ width:150px; left:calc(50% + 70px); bottom:60px; }
-  .sim[data-state="near"] .token,.sim[data-state="read"] .token{ transform:translate(-44px,-320px) rotate(-14deg) scale(.94); }
+  .token{ width:150px; left:calc(50% + 70px); bottom:60px; --tx:-44px; --ty:-479px; --ts:.72; --tb:22px; }
 }
 
 /* ---------- catálogo ---------- */
@@ -559,6 +592,7 @@ textarea.input{ min-height:112px; resize:vertical; }
   .hero__text > *{ animation:none; }
   .btn:active,.iconbtn:active,.chip:active,.tile:active,.qty button:active,.dock button:active{ transform:none; }
   .seg__pill,.packs__frame,.dock__pill,.token,.scr-banner,.scr-card,.faq__a,.faq__q .ic,.closing__say .w > span,.badge{ transition-duration:.01ms; }
+  .sim .token,.sim .token::before,.sim .token::after{ animation:none; }
   .pcard{ transition:border-color 200ms ease, opacity 240ms ease; }
   .drawer{ transform:none; opacity:0; transition:opacity 180ms ease, visibility 0s linear 180ms; }
   .drawer.is-open{ opacity:1; transition:opacity 220ms ease, visibility 0s; }
@@ -1475,7 +1509,7 @@ function simGoToPhone(done){
 function simRun(){
   simT.forEach(clearTimeout); simT = []; cancelAnimationFrame(simRaf);
   var out = $('#simTime'), go = $('#simGo'), fast = reduce.matches;
-  var D = fast ? [0, 100, 500] : [0, 750, 1750];
+  var D = fast ? [0, 100, 500] : [0, 950, 1950];
   simState('idle'); out.textContent = '0,0 s';
   var typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName) && sim.contains(document.activeElement);
   if (typing) document.activeElement.blur();
@@ -1766,9 +1800,7 @@ var FRAG3 = [
 '    if(q.y<-.3&&q.x>-.375&&q.x<.675)d=max(d,-hole);',
 '    // broche negro encajado en un agujero',
 '    d=min(d,ext(length(vec2(q.x-.15,q.z))-.048,q.y+.765,.018)-.012);',
-'    // punto pequeno del chip en la cara del frente',
-'    float dotc=ext(length(vec2(q.x-.4,q.z))-.03,q.y-.708,.006)-.004;',
-'    return un(vec2(d*1.2,7.),vec2(dotc*1.2,6.));',
+'    return vec2(d*1.2,7.);',
 '  }',
 '  return vec2(tube(p,.72,.055,.3,.03),5.);',
 '}',
