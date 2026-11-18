@@ -118,8 +118,16 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
   background:rgba(10,10,11,.88); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line);
 }
-.nav{ transition:transform 260ms var(--ease-out); }
-.nav.is-cine{ transform:translateY(-110%); transition:transform 220ms var(--ease-out); pointer-events:none; }
+.nav{ will-change:transform; transition:transform 520ms var(--ease-drawer), opacity 360ms ease; }
+.nav__in > *{ transition:opacity 420ms ease, transform 560ms var(--ease-out), filter 420ms ease; }
+.nav__in > :nth-child(1){ transition-delay:90ms; }
+.nav__in > :nth-child(2){ transition-delay:130ms; }
+.nav__in > :nth-child(3){ transition-delay:170ms; }
+/* salida: primero se apaga el contenido, luego se recoge el panel */
+.nav.is-cine{ transform:translate3d(0,-100%,0); opacity:0; pointer-events:none;
+  transition:transform 340ms cubic-bezier(.55,0,.8,.25) 70ms, opacity 260ms ease 130ms; }
+.nav.is-cine .nav__in > *{ opacity:0; transform:translate3d(0,-10px,0); filter:blur(6px);
+  transition:opacity 180ms ease, transform 240ms ease-in, filter 200ms ease; transition-delay:0ms; }
 .nav__in{ height:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .brand{ display:inline-flex; align-items:center; gap:10px; font-weight:500; font-size:1.0625rem; letter-spacing:-.03em; min-height:44px; }
 .brand__mark{ position:relative; width:36px; height:36px; flex:none; display:grid; place-items:center; }
@@ -480,7 +488,15 @@ textarea.input{ min-height:112px; resize:vertical; }
   transform:translateY(110%); transition:transform 260ms var(--ease-out);
 }
 .bar.is-on{ transform:none; transition:transform 380ms var(--ease-drawer); }
-.bar.is-on.is-cine{ transform:translateY(110%); transition:transform 220ms var(--ease-out); pointer-events:none; }
+.bar > *{ transition:opacity 420ms ease, transform 560ms var(--ease-out), filter 420ms ease; }
+.bar.is-on > :nth-child(1){ transition-delay:110ms; }
+.bar.is-on > :nth-child(2){ transition-delay:160ms; }
+.bar.is-on.is-cine{ transform:translate3d(0,110%,0); opacity:0; pointer-events:none;
+  transition:transform 340ms cubic-bezier(.55,0,.8,.25) 70ms, opacity 260ms ease 130ms; }
+.bar.is-on.is-cine > *{ opacity:0; transform:translate3d(0,10px,0); filter:blur(6px);
+  transition:opacity 180ms ease, transform 240ms ease-in, filter 200ms ease; transition-delay:0ms; }
+.bar{ will-change:transform; }
+.bar.is-on:not(.is-cine){ transition:transform 520ms var(--ease-drawer), opacity 360ms ease; }
 .bar__info{ display:grid; line-height:1.2; min-width:0; }
 .bar__info span{ font-size:.75rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .bar__info strong{ font-size:1.25rem; font-weight:500; letter-spacing:-.03em; }
@@ -603,8 +619,9 @@ textarea.input{ min-height:112px; resize:vertical; }
   .bar.is-on,.toast.is-on,.menu.is-open{ opacity:1; }
   .bar:not(.is-on){ pointer-events:none; }
   .bar.is-on.is-cine{ opacity:0; pointer-events:none; }
-  .nav{ transition:opacity 180ms ease; }
+  .nav, .nav.is-cine, .bar.is-on:not(.is-cine){ transition:opacity 200ms ease; }
   .nav.is-cine{ transform:none; opacity:0; pointer-events:none; }
+  .nav__in > *, .nav.is-cine .nav__in > *, .bar > *, .bar.is-on.is-cine > *{ transform:none; filter:none; transition:none; opacity:1; }
   .viewer__frame img{ transform:none; filter:none; }
   .emblem canvas{ transform:none; }
 }
@@ -662,6 +679,7 @@ textarea.input{ min-height:112px; resize:vertical; }
       <span>ChipOne</span>
     </a>
     <nav class="nav__links" aria-label="Principal">
+      <a href="#cine">En acción</a>
       <a href="#como-funciona">Cómo funciona</a>
       <a href="#productos">Productos</a>
       <a href="#packs">Packs</a>
@@ -682,6 +700,7 @@ textarea.input{ min-height:112px; resize:vertical; }
 </header>
 
 <nav class="menu" id="menu" aria-label="Menú">
+  <a href="#cine">En acción <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
   <a href="#como-funciona">Cómo funciona <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
   <a href="#productos">Productos <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
   <a href="#packs">Packs y precios <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
@@ -716,36 +735,57 @@ textarea.input{ min-height:112px; resize:vertical; }
 </section>
 
 <!-- ================= VIDEO ESTRELLA ================= -->
-<section class="cine" id="cine" aria-label="ChipOne en movimiento: un toque y tu contacto llega al celular">
-  <video class="cine__v" id="cineVideo" loop muted playsinline preload="auto" disablePictureInPicture disableRemotePlayback
-    data-desktop="assets/videos/chipone-desktop.mp4" data-mobile="assets/videos/chipone-mobile.mp4" tabindex="-1" aria-hidden="true"></video>
+<section class="cine" id="cine" aria-label="ChipOne en acción: un toque y tu contacto llega al celular">
+  <video class="cine__v" id="cineVideo" loop muted playsinline preload="none" disablePictureInPicture disableRemotePlayback
+    data-desktop="assets/videos/chipone-desktop.mp4" data-mobile="assets/videos/chipone-mobile.mp4" data-poster-desktop="assets/videos/chipone-desktop.jpg" data-poster-mobile="assets/videos/chipone-mobile.jpg" tabindex="-1" aria-hidden="true"></video>
 </section>
 <script>
 (function(){
   var v=document.getElementById('cineVideo'); if(!v) return;
   var mq=window.matchMedia('(max-width: 768px)');
-  var playing=false, armed=true;
+  var root=document.documentElement;
+  var playing=false, armed=true, hidden=false, hideT=0, near=false, started=false;
+  function start(){ if(started) return; started=true; check(); }
+  ['scroll','touchstart','pointerdown','keydown','wheel'].forEach(function(ev){ window.addEventListener(ev,start,{passive:true,once:true}); });
+  window.addEventListener('load',function(){ setTimeout(start, 3500); });
   function pick(){
-    var src=mq.matches? v.getAttribute('data-mobile') : v.getAttribute('data-desktop');
-    if(v.getAttribute('src')!==src){ v.setAttribute('src',src); v.load(); playing=false; armed=true; }
+    var m=mq.matches, src=v.getAttribute(m?'data-mobile':'data-desktop'), poster=v.getAttribute(m?'data-poster-mobile':'data-poster-desktop');
+    if(v.getAttribute('poster')!==poster) v.setAttribute('poster',poster);
+    if(v.getAttribute('src')!==src){ v.setAttribute('src',src); if(near) v.load(); playing=false; armed=true; }
     v.muted=true; v.defaultMuted=true; v.removeAttribute('controls');
   }
-  function check(){
-    var r=v.getBoundingClientRect(), vh=window.innerHeight, top=0;
-    var seen=Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, top));
-    var room=vh-top;
-    // completo a la vista: todo el video entra, o llena la pantalla si es más alto que ella
-    var full = r.height<=room ? (r.top>=top-6 && r.bottom<=vh+6) : (seen>=room*0.94);
-    // mientras el video está a la vista se esconden la barra de arriba y la de abajo
-    var hide = seen > Math.min(r.height, room)*0.3;
+  // esconde o muestra las dos barras; al esconder espera un instante para no parpadear al pasar rápido
+  function setHidden(h){
+    if(h===hidden){ clearTimeout(hideT); hideT=0; return; }
+    if(h){ if(hideT) return; hideT=setTimeout(function(){ hideT=0; if(want()) apply(true); }, 140); }
+    else { clearTimeout(hideT); hideT=0; apply(false); }
+  }
+  function apply(h){
+    hidden=h;
     var bar=document.getElementById('bar'), nav=document.querySelector('.nav');
-    if(bar) bar.classList.toggle('is-cine', hide);
-    if(nav) nav.classList.toggle('is-cine', hide);
+    if(bar) bar.classList.toggle('is-cine', h);
+    if(nav) nav.classList.toggle('is-cine', h);
+  }
+  var lastSeen=0;
+  function busy(){ return root.classList.contains('lock') || !!document.querySelector('#menu.is-open'); }
+  function want(){ return lastSeen>0.35 && !busy(); }
+  function check(){
+    var r=v.getBoundingClientRect(), vh=window.innerHeight;
+    var seen=Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+    var frac=seen/Math.max(1, Math.min(r.height, vh));
+    lastSeen=frac;
+    // pide el video cuando ya está cerca (así la página carga liviana)
+    if(!near && started && r.top < vh*2.2 && r.bottom > -vh){ near=true; v.preload='auto'; v.load(); }
+    // con margen para que no tiemble: se esconde arriba de 35 % y vuelve abajo de 20 %
+    if(busy()) setHidden(false);
+    else if(frac>0.35) setHidden(true);
+    else if(frac<0.2) setHidden(false);
+    var full = r.height<=vh ? (r.top>=-6 && r.bottom<=vh+6) : (frac>=0.94);
     if(seen<=0){ if(playing){ v.pause(); playing=false; } if(!armed){ try{ v.currentTime=0; }catch(e){} armed=true; } return; }
     if(full && !playing && !document.hidden){
       if(armed){ try{ v.currentTime=0; }catch(e){} armed=false; }
       var p=v.play(); playing=true; if(p&&p.catch) p.catch(function(){ playing=false; });
-    } else if(!full && playing && seen < Math.min(r.height, room)*0.5){ v.pause(); playing=false; }
+    } else if(!full && playing && frac<0.5){ v.pause(); playing=false; }
   }
   var tick=false;
   function onScroll(){ if(tick) return; tick=true; requestAnimationFrame(function(){ tick=false; check(); }); }
@@ -756,6 +796,20 @@ textarea.input{ min-height:112px; resize:vertical; }
   document.addEventListener('visibilitychange',function(){ if(document.hidden){ v.pause(); playing=false; } else check(); });
   v.addEventListener('loadeddata',check);
   window.addEventListener('pageshow',check);
+  // si alguien navega con teclado hasta la barra escondida, la barra vuelve a aparecer
+  document.addEventListener('focusin',function(e){ var t=e.target; if(hidden && t && t.closest && t.closest('.nav, #bar')) apply(false); });
+  // al abrir el menú o el pedido las barras vuelven de inmediato
+  if('MutationObserver' in window){ var mo=new MutationObserver(onScroll); mo.observe(root,{attributes:true,attributeFilter:['class']}); var mn=document.getElementById('menu'); if(mn) mo.observe(mn,{attributes:true,attributeFilter:['class']}); }
+  // el acceso "En acción" deja el video centrado y completo en pantalla
+  document.addEventListener('click',function(e){
+    var a=e.target.closest && e.target.closest('a[href="#cine"]'); if(!a) return;
+    e.preventDefault();
+    var r=v.getBoundingClientRect(), vh=window.innerHeight;
+    var y=Math.max(0, Math.round(window.scrollY + r.top - Math.max(0,(vh - r.height)/2)));
+    var red=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function(){ window.scrollTo({top:y, behavior: red?'auto':'smooth'}); }, document.querySelector('#menu.is-open')?0:0);
+    if(history.replaceState) history.replaceState(null,'','#cine');
+  });
   check();
 })();
 </script>
@@ -1021,6 +1075,7 @@ textarea.input{ min-height:112px; resize:vertical; }
         <h3>Tienda</h3>
         <a href="#productos">Productos</a>
         <a href="#packs">Packs y precios</a>
+        <a href="#cine">ChipOne en acción</a>
         <a href="#como-funciona">Cómo funciona</a>
       </div>
       <div>
