@@ -118,6 +118,8 @@ button,.btn,.chip,.iconbtn{ -webkit-user-select:none; user-select:none; }
   background:rgba(10,10,11,.88); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line);
 }
+.nav{ transition:transform 260ms var(--ease-out); }
+.nav.is-cine{ transform:translateY(-110%); transition:transform 220ms var(--ease-out); pointer-events:none; }
 .nav__in{ height:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .brand{ display:inline-flex; align-items:center; gap:10px; font-weight:500; font-size:1.0625rem; letter-spacing:-.03em; min-height:44px; }
 .brand__mark{ position:relative; width:36px; height:36px; flex:none; display:grid; place-items:center; }
@@ -601,6 +603,8 @@ textarea.input{ min-height:112px; resize:vertical; }
   .bar.is-on,.toast.is-on,.menu.is-open{ opacity:1; }
   .bar:not(.is-on){ pointer-events:none; }
   .bar.is-on.is-cine{ opacity:0; pointer-events:none; }
+  .nav{ transition:opacity 180ms ease; }
+  .nav.is-cine{ transform:none; opacity:0; pointer-events:none; }
   .viewer__frame img{ transform:none; filter:none; }
   .emblem canvas{ transform:none; }
 }
@@ -726,15 +730,17 @@ textarea.input{ min-height:112px; resize:vertical; }
     if(v.getAttribute('src')!==src){ v.setAttribute('src',src); v.load(); playing=false; armed=true; }
     v.muted=true; v.defaultMuted=true; v.removeAttribute('controls');
   }
-  function navBottom(){ var n=document.querySelector('.nav'); if(!n) return 0; var r=n.getBoundingClientRect(); return r.bottom>0 ? r.bottom : 0; }
   function check(){
-    var r=v.getBoundingClientRect(), vh=window.innerHeight, top=navBottom();
+    var r=v.getBoundingClientRect(), vh=window.innerHeight, top=0;
     var seen=Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, top));
     var room=vh-top;
     // completo a la vista: todo el video entra, o llena la pantalla si es más alto que ella
     var full = r.height<=room ? (r.top>=top-6 && r.bottom<=vh+6) : (seen>=room*0.94);
-    var bar=document.getElementById('bar');
-    if(bar) bar.classList.toggle('is-cine', seen > Math.min(r.height, room)*0.3);
+    // mientras el video está a la vista se esconden la barra de arriba y la de abajo
+    var hide = seen > Math.min(r.height, room)*0.3;
+    var bar=document.getElementById('bar'), nav=document.querySelector('.nav');
+    if(bar) bar.classList.toggle('is-cine', hide);
+    if(nav) nav.classList.toggle('is-cine', hide);
     if(seen<=0){ if(playing){ v.pause(); playing=false; } if(!armed){ try{ v.currentTime=0; }catch(e){} armed=true; } return; }
     if(full && !playing && !document.hidden){
       if(armed){ try{ v.currentTime=0; }catch(e){} armed=false; }
