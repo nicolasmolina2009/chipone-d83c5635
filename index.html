@@ -1594,6 +1594,8 @@ function paintSim(){
   $$('.c-links li').forEach(function(li){ li.hidden = d.links.indexOf(li.dataset.link) < 0; });
   placePill($('#segTema'));
 }
+// vibración suave (solo en teléfonos que la permiten, como Android; en iPhone no hace nada)
+function haptic(p){ try{ if (navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 function simState(s){
   sim.dataset.state = s;
   var n = { idle:0, near:1, read:2, open:3 }[s];
@@ -1637,9 +1639,9 @@ function simRun(){
           if (s < 1) simRaf = requestAnimationFrame(tick);
         })(t0);
         simT.push(setTimeout(function(){ simState('near'); }, D[0]));
-        simT.push(setTimeout(function(){ simState('read'); }, D[1]));
+        simT.push(setTimeout(function(){ simState('read'); haptic(14); }, D[1]));
         simT.push(setTimeout(function(){
-          simState('open'); go.textContent = 'Repetir el toque';
+          simState('open'); haptic([8, 70, 12]); go.textContent = 'Repetir el toque';
           $('#simSay').textContent = 'Se abrió la tarjeta de contacto de ' + ($('#fNombre').value.trim() || 'tu nombre') + ' en un segundo.';
         }, D[2]));
       }, fast ? 0 : 260));
