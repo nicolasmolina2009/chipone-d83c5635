@@ -478,6 +478,7 @@ textarea.input{ min-height:112px; resize:vertical; }
   transform:translateY(110%); transition:transform 260ms var(--ease-out);
 }
 .bar.is-on{ transform:none; transition:transform 380ms var(--ease-drawer); }
+.bar.is-on.is-cine{ transform:translateY(110%); transition:transform 220ms var(--ease-out); pointer-events:none; }
 .bar__info{ display:grid; line-height:1.2; min-width:0; }
 .bar__info span{ font-size:.75rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .bar__info strong{ font-size:1.25rem; font-weight:500; letter-spacing:-.03em; }
@@ -599,6 +600,7 @@ textarea.input{ min-height:112px; resize:vertical; }
   .bar,.toast,.menu{ transform:none; opacity:0; transition:opacity 180ms ease, visibility 0s; }
   .bar.is-on,.toast.is-on,.menu.is-open{ opacity:1; }
   .bar:not(.is-on){ pointer-events:none; }
+  .bar.is-on.is-cine{ opacity:0; pointer-events:none; }
   .viewer__frame img{ transform:none; filter:none; }
   .emblem canvas{ transform:none; }
 }
@@ -711,23 +713,44 @@ textarea.input{ min-height:112px; resize:vertical; }
 
 <!-- ================= VIDEO ESTRELLA ================= -->
 <section class="cine" id="cine" aria-label="ChipOne en movimiento: un toque y tu contacto llega al celular">
-  <video class="cine__v" id="cineVideo" autoplay loop muted playsinline preload="auto" disablePictureInPicture disableRemotePlayback
+  <video class="cine__v" id="cineVideo" loop muted playsinline preload="auto" disablePictureInPicture disableRemotePlayback
     data-desktop="assets/videos/chipone-desktop.mp4" data-mobile="assets/videos/chipone-mobile.mp4" tabindex="-1" aria-hidden="true"></video>
 </section>
 <script>
 (function(){
   var v=document.getElementById('cineVideo'); if(!v) return;
   var mq=window.matchMedia('(max-width: 768px)');
-  function go(){ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
+  var playing=false, armed=true;
   function pick(){
     var src=mq.matches? v.getAttribute('data-mobile') : v.getAttribute('data-desktop');
-    if(v.getAttribute('src')!==src){ v.setAttribute('src',src); v.load(); }
-    v.muted=true; v.defaultMuted=true; v.removeAttribute('controls'); go();
+    if(v.getAttribute('src')!==src){ v.setAttribute('src',src); v.load(); playing=false; armed=true; }
+    v.muted=true; v.defaultMuted=true; v.removeAttribute('controls');
   }
+  function navBottom(){ var n=document.querySelector('.nav'); if(!n) return 0; var r=n.getBoundingClientRect(); return r.bottom>0 ? r.bottom : 0; }
+  function check(){
+    var r=v.getBoundingClientRect(), vh=window.innerHeight, top=navBottom();
+    var seen=Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, top));
+    var room=vh-top;
+    // completo a la vista: todo el video entra, o llena la pantalla si es más alto que ella
+    var full = r.height<=room ? (r.top>=top-6 && r.bottom<=vh+6) : (seen>=room*0.94);
+    var bar=document.getElementById('bar');
+    if(bar) bar.classList.toggle('is-cine', seen > Math.min(r.height, room)*0.3);
+    if(seen<=0){ if(playing){ v.pause(); playing=false; } if(!armed){ try{ v.currentTime=0; }catch(e){} armed=true; } return; }
+    if(full && !playing && !document.hidden){
+      if(armed){ try{ v.currentTime=0; }catch(e){} armed=false; }
+      var p=v.play(); playing=true; if(p&&p.catch) p.catch(function(){ playing=false; });
+    } else if(!full && playing && seen < Math.min(r.height, room)*0.5){ v.pause(); playing=false; }
+  }
+  var tick=false;
+  function onScroll(){ if(tick) return; tick=true; requestAnimationFrame(function(){ tick=false; check(); }); }
   pick();
-  if(mq.addEventListener) mq.addEventListener('change',pick); else if(mq.addListener) mq.addListener(pick);
-  ['loadeddata','canplay','pause'].forEach(function(e){ v.addEventListener(e,function(){ if(!document.hidden) go(); }); });
-  ['scroll','touchstart','click','pageshow','visibilitychange'].forEach(function(e){ window.addEventListener(e,function(){ if(v.paused && !document.hidden) go(); },{passive:true}); });
+  if(mq.addEventListener) mq.addEventListener('change',function(){ pick(); check(); }); else if(mq.addListener) mq.addListener(function(){ pick(); check(); });
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll);
+  document.addEventListener('visibilitychange',function(){ if(document.hidden){ v.pause(); playing=false; } else check(); });
+  v.addEventListener('loadeddata',check);
+  window.addEventListener('pageshow',check);
+  check();
 })();
 </script>
 
@@ -1111,7 +1134,7 @@ textarea.input{ min-height:112px; resize:vertical; }
 var CONFIG = {
   // Número de WhatsApp del negocio: indicativo + número, sin espacios ni signos. Ejemplo: "573001234567".
   // Si lo dejas vacío, WhatsApp se abre con el mensaje listo y pide elegir a quién enviarlo.
-  whatsapp: ""
+  whatsapp: "573202957065"
 };
 // Precios de ejemplo en pesos colombianos: cámbialos por los reales.
 var PRODUCTOS = [
